@@ -8,6 +8,7 @@
   "engines": {
     "vscode": "^1.70.0"
   },
+  "repository": {"url": "https://github.com/JonathanGrinfeld/vscode-xp.git"},
   "files": ["out", "assets", "readme.md", "node_modules"],
   "categories": [
     "Other"
