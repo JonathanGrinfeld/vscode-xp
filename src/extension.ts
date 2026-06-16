@@ -1,6 +1,8 @@
 import * as vscode from "vscode";
 import { createHash } from "crypto";
 import {
+    DAILY_BONUS_MIN_LEVEL,
+    DAILY_BONUS_XP,
     DUPLICATE_CONTENT_WINDOW_MS,
     IGNORED_FILE_NAMES,
     IGNORED_PATH_SEGMENTS,
@@ -20,6 +22,8 @@ import {
     validateXpMultiplier,
 } from "./state";
 import { showConfettiInStatusBar, showStatsPopup } from "./ui";
+
+const STATE_SYNC_INTERVAL_MS = 2500;
 
 export function activate(context: vscode.ExtensionContext) {
     const stats = getStats(context);
@@ -59,6 +63,10 @@ export function activate(context: vscode.ExtensionContext) {
             `XP in level: **${model.xpInLevel.toLocaleString()} / ${model.xpNeeded.toLocaleString()}**  \n`,
         );
         tooltip.appendMarkdown(`Total XP: **${model.totalXp.toLocaleString()}**  \n`);
+        tooltip.appendMarkdown(`Daily streak: **${model.dailyStreak} day${model.dailyStreak === 1 ? "" : "s"}**  \n`);
+        tooltip.appendMarkdown(
+            `Daily bonus: **${model.dailyBonusAvailable ? "Available (+100 XP)" : "Claimed"}**  \n`,
+        );
         tooltip.appendMarkdown(`Multiplier: **${model.xpMultiplier}x**  \n\n`);
         tooltip.appendMarkdown("Click to open settings.");
 
@@ -67,6 +75,21 @@ export function activate(context: vscode.ExtensionContext) {
         confettiBar.show();
         statusBar.show();
     };
+
+    const syncStatsFromGlobalState = () => {
+        const latestStats = getStats(context);
+        if (areStatsEqual(stats, latestStats)) {
+            return;
+        }
+
+        applyStats(stats, latestStats);
+        updateStatus();
+    };
+
+    const stateSyncTimer = setInterval(syncStatsFromGlobalState, STATE_SYNC_INTERVAL_MS);
+    context.subscriptions.push({
+        dispose: () => clearInterval(stateSyncTimer),
+    });
 
     const changeListener = vscode.workspace.onDidChangeTextDocument((event) => {
         if (event.document.isUntitled || event.contentChanges.length === 0) {
@@ -116,7 +139,19 @@ export function activate(context: vscode.ExtensionContext) {
 
         const effectiveChanges = Math.min(changes, MAX_COUNTED_CHANGES_PER_SAVE);
         const baseXp = Math.ceil(effectiveChanges / XP_CHANGE_DIVISOR);
-        const gainedXp = Math.ceil(baseXp * config.xpMultiplier);
+        let gainedXp = Math.ceil(baseXp * config.xpMultiplier);
+
+        const todayKey = getTodayKey();
+        updateDailyStreak(stats, todayKey);
+
+        const dailyBonusEligible =
+            stats.level > DAILY_BONUS_MIN_LEVEL && stats.lastBonusDay !== todayKey;
+        if (dailyBonusEligible) {
+            gainedXp += DAILY_BONUS_XP;
+            stats.lastBonusDay = todayKey;
+            showInfoMessage(`Daily streak bonus: +${DAILY_BONUS_XP} XP`);
+        }
+
         stats.totalXp += gainedXp;
         pendingChanges.delete(key);
 
@@ -224,6 +259,37 @@ export function activate(context: vscode.ExtensionContext) {
 
 export function deactivate() {}
 
+function areStatsEqual(a: { totalXp: number; level: number; dailyStreak?: number; lastActiveDay?: string; lastBonusDay?: string }, b: { totalXp: number; level: number; dailyStreak?: number; lastActiveDay?: string; lastBonusDay?: string }): boolean {
+    return a.totalXp === b.totalXp
+        && a.level === b.level
+        && (a.dailyStreak ?? 0) === (b.dailyStreak ?? 0)
+        && a.lastActiveDay === b.lastActiveDay
+        && a.lastBonusDay === b.lastBonusDay;
+}
+
+function applyStats(
+    target: {
+        totalXp: number;
+        level: number;
+        dailyStreak?: number;
+        lastActiveDay?: string;
+        lastBonusDay?: string;
+    },
+    source: {
+        totalXp: number;
+        level: number;
+        dailyStreak?: number;
+        lastActiveDay?: string;
+        lastBonusDay?: string;
+    },
+): void {
+    target.totalXp = source.totalXp;
+    target.level = source.level;
+    target.dailyStreak = source.dailyStreak;
+    target.lastActiveDay = source.lastActiveDay;
+    target.lastBonusDay = source.lastBonusDay;
+}
+
 function shouldIgnoreDocument(document: vscode.TextDocument): boolean {
     const fsPath = document.uri.fsPath.replace(/\\/g, "/").toLowerCase();
     const fileName = fsPath.split("/").pop() ?? "";
@@ -251,4 +317,44 @@ function pruneOldFingerprints(cache: Map<string, number>, now: number): void {
             cache.delete(hash);
         }
     }
+}
+
+function getTodayKey(date = new Date()): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+}
+
+function updateDailyStreak(stats: { dailyStreak: number; lastActiveDay?: string }, todayKey: string): void {
+    if (!stats.lastActiveDay) {
+        stats.dailyStreak = 1;
+        stats.lastActiveDay = todayKey;
+        return;
+    }
+
+    if (stats.lastActiveDay === todayKey) {
+        return;
+    }
+
+    const dayDiff = getDayDifference(stats.lastActiveDay, todayKey);
+    if (dayDiff === 1) {
+        stats.dailyStreak += 1;
+    } else {
+        stats.dailyStreak = 1;
+    }
+
+    stats.lastActiveDay = todayKey;
+}
+
+function getDayDifference(previousDay: string, currentDay: string): number {
+    const previous = new Date(`${previousDay}T00:00:00`);
+    const current = new Date(`${currentDay}T00:00:00`);
+
+    if (Number.isNaN(previous.getTime()) || Number.isNaN(current.getTime())) {
+        return 0;
+    }
+
+    const millisPerDay = 24 * 60 * 60 * 1000;
+    return Math.round((current.getTime() - previous.getTime()) / millisPerDay);
 }
