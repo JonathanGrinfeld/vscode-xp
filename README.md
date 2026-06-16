@@ -1,0 +1,1 @@
+There is a xp bar in the status bar. when you save a file with changes you get xp
