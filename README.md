@@ -44,7 +44,8 @@ Ignored by default includes common lockfiles and paths such as:
 - lockfiles like `package-lock.json`, `pnpm-lock.yaml`, `yarn.lock`
 - minified and sourcemap files (`*.min.js`, `*.map`)
 
-But you can always change the xp multiplier if you feel like it
+But you can always change the xp multiplier if you feel like it.
+
 ## Commands
 
 Open the Command Palette and run:

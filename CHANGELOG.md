@@ -4,14 +4,14 @@ All notable changes to this project are documented in this file.
 
 The format is based on Keep a Changelog, and this project follows Semantic Versioning.
 
-## [1.0.2]
+## [1.0.2] - 2026-06-16
 
 ### Documentation
 - Improved README with full feature, command, setting, and development documentation.
 - Added a complete, structured changelog.
 - Added a contributing doc.
 
-## [1.0.1] - 2026-06-16
+## [1.0.1] - 2026-06-15
 
 ### Added
 - Status bar XP indicator with clickable stats action.
@@ -28,7 +28,7 @@ The format is based on Keep a Changelog, and this project follows Semantic Versi
 - Added ignored file/path rules to reduce generated-file XP inflation.
 - Added minimum and maximum counted change constraints to normalize XP gains.
 
-## [1.0.0] - 2026-06-16
+## [1.0.0] - 2026-06-14
 
 ### Added
 - Initial release of `vscode-xp`.
