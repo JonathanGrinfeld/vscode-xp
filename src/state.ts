@@ -23,6 +23,9 @@ export function getStats(context: vscode.ExtensionContext): PlayerStats {
             return {
                 totalXp: Math.max(0, Math.floor(current.totalXp)),
                 level: Math.max(1, Math.floor(current.level)),
+                dailyStreak: normalizeNonNegativeInteger(current.dailyStreak, 0),
+                lastActiveDay: normalizeDayKey(current.lastActiveDay),
+                lastBonusDay: normalizeDayKey(current.lastBonusDay),
             };
         }
 
@@ -38,7 +41,7 @@ export function getStats(context: vscode.ExtensionContext): PlayerStats {
         return migrated;
     }
 
-    return { totalXp: 0, level: 1 };
+    return { totalXp: 0, level: 1, dailyStreak: 0 };
 }
 
 export function setStats(context: vscode.ExtensionContext, stats: PlayerStats) {
@@ -112,6 +115,9 @@ export async function resetXPBar(
 ): Promise<void> {
     stats.totalXp = 0;
     stats.level = 1;
+    stats.dailyStreak = 0;
+    stats.lastActiveDay = undefined;
+    stats.lastBonusDay = undefined;
     pendingChanges.clear();
     await setStats(context, stats);
     updateStatus();
@@ -132,6 +138,14 @@ export function validateXpMultiplier(value: string): string | undefined {
 
 function normalizePositiveInteger(value: unknown, fallback: number): number {
     if (typeof value !== "number" || !Number.isInteger(value) || value <= 0) {
+        return fallback;
+    }
+
+    return value;
+}
+
+function normalizeNonNegativeInteger(value: unknown, fallback: number): number {
+    if (typeof value !== "number" || !Number.isInteger(value) || value < 0) {
         return fallback;
     }
 
@@ -207,5 +221,14 @@ function migrateLegacyStats(legacy: LegacyPlayerStats): PlayerStats {
     return {
         totalXp,
         level: getLevelForTotalXp(totalXp),
+        dailyStreak: 0,
     };
+}
+
+function normalizeDayKey(value: unknown): string | undefined {
+    if (typeof value !== "string") {
+        return undefined;
+    }
+
+    return /^\d{4}-\d{2}-\d{2}$/.test(value) ? value : undefined;
 }
