@@ -1,4 +1,5 @@
 import { StatsViewModel, PlayerStats, XpConfig } from "./types";
+import { DAILY_BONUS_MIN_LEVEL } from "./constants";
 
 // RuneScape XP table formula: floor(1/4 * sum(floor(n + 300 * 2^(n/7))), n=1..L-1)
 export function getTotalXpForLevel(level: number): number {
@@ -37,7 +38,19 @@ export function getStatsViewModel(stats: PlayerStats, config: XpConfig): StatsVi
         xpNeeded,
         progressPercent,
         xpMultiplier: config.xpMultiplier,
+        dailyStreak: Math.max(0, Math.floor(stats.dailyStreak ?? 0)),
+        dailyBonusAvailable:
+            stats.level > DAILY_BONUS_MIN_LEVEL
+            && stats.lastBonusDay !== getTodayKey(),
     };
+}
+
+function getTodayKey(): string {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
 }
 
 export function renderTextProgressBar(progressPercent: number, width: number): string {

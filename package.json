@@ -4,7 +4,7 @@
   "displayName": "vscode-xp",
   "icon": "assets/vscode-xp.png",
   "description": "Earn XP whenever you save a file and climb to the highest level!",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "engines": {
     "vscode": "^1.70.0"
   },

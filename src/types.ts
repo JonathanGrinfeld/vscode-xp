@@ -3,6 +3,9 @@ import * as vscode from "vscode";
 export interface PlayerStats {
     totalXp: number;
     level: number;
+    dailyStreak: number;
+    lastActiveDay?: string;
+    lastBonusDay?: string;
 }
 
 export interface LegacyPlayerStats {
@@ -30,6 +33,8 @@ export interface StatsViewModel {
     xpNeeded: number;
     progressPercent: number;
     xpMultiplier: number;
+    dailyStreak: number;
+    dailyBonusAvailable: boolean;
 }
 
 export interface StatsQuickPickItem extends vscode.QuickPickItem {

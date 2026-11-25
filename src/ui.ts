@@ -47,25 +47,25 @@ export async function showStatsPopup(
     }
 
     if (picked.action === "configure") {
-        await vscode.commands.executeCommand("vscl.configureXp");
+        await vscode.commands.executeCommand("vscx.configureXp");
         await showStatsPopup(_stats, config);
         return;
     }
 
     if (picked.action === "toggleInfoMessages") {
-        await vscode.commands.executeCommand("vscl.toggleInfoMessages");
+        await vscode.commands.executeCommand("vscx.toggleInfoMessages");
         await showStatsPopup(_stats, config);
         return;
     }
 
     if (picked.action === "toggleStatusBarConfetti") {
-        await vscode.commands.executeCommand("vscl.toggleStatusBarConfetti");
+        await vscode.commands.executeCommand("vscx.toggleStatusBarConfetti");
         await showStatsPopup(_stats, config);
         return;
     }
 
     if (picked.action === "reset") {
-        await vscode.commands.executeCommand("vscl.reset");
+        await vscode.commands.executeCommand("vscx.reset");
         await showStatsPopup(_stats, config);
     }
 }

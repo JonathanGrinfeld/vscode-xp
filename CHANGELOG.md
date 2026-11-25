@@ -4,6 +4,16 @@ All notable changes to this project are documented in this file.
 
 The format is based on Keep a Changelog, and this project follows Semantic Versioning.
 
+## [1.0.3] - 2026-06-16
+
+### Added
+- Added daily streak tracking for XP-eligible coding days.
+- Added daily streak and daily bonus status to the status bar hover details.
+- Added a +100 XP first-save daily bonus when your level is above 10.
+
+### Documentation
+- Updated README with daily streak behavior and daily bonus rules.
+
 ## [1.0.2] - 2026-06-16
 
 ### Documentation

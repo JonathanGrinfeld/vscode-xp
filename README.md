@@ -11,6 +11,8 @@ Earn XP as you code in VS Code.
 - RuneScape-style level curve for progression
 - Optional level-up info messages
 - Optional status bar confetti celebration on level-up
+- Daily streak tracking shown in the status bar hover
+- First meaningful save of each day grants +100 XP when level is above 10
 - Quick commands for stats, settings, toggles, and reset
 
 ## How XP Is Earned
@@ -26,8 +28,17 @@ XP formula per save:
 - `effectiveChanges = min(changes, 2500)`
 - `baseXp = ceil(effectiveChanges / 10)`
 - `gainedXp = ceil(baseXp * xpMultiplier)`
+- `dailyBonus = +100` on the first meaningful save of the day if your current level is greater than 10
 
 This keeps rewards proportional to effort while preventing extreme spikes.
+
+## Daily Streak
+
+- Your streak increases when you make at least one XP-eligible save on consecutive days.
+- Missing a day resets the streak to 1 on your next XP-eligible save.
+- The status bar hover shows:
+	- Current streak length
+	- Whether the daily bonus is still available today or already claimed
 
 ## Anti-Farming Safeguards
 

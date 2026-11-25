@@ -14,6 +14,8 @@ export const SETTING_SHOW_STATUS_BAR_CONFETTI = "showStatusBarConfetti";
 export const MIN_CHANGES_FOR_XP = 5;
 export const MAX_COUNTED_CHANGES_PER_SAVE = 2500;
 export const DUPLICATE_CONTENT_WINDOW_MS = 2 * 60 * 1000;
+export const DAILY_BONUS_XP = 100;
+export const DAILY_BONUS_MIN_LEVEL = 10;
 export const IGNORED_FILE_NAMES = new Set([
 	"package-lock.json",
 	"pnpm-lock.yaml",
